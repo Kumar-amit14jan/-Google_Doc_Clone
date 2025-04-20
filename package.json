@@ -1,0 +1,11 @@
+{
+  "name": "google_doc",
+  "version": "1.0.0",
+  "description": "A collaborative rich text editor inspired by Google Docs, built with **React** and **Node.js**. This app allows users to create, edit, and auto-save documents with a simple, intuitive interface.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Amit Kumar",
+  "license": "ISC"
+}
