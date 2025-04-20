@@ -20,7 +20,7 @@ A collaborative rich text editor inspired by Google Docs, built with **React** a
 | -------------- | ------------- | ------------- |
 | React          | Node.js       | Express       |
 | Quill.js       | MongoDB       | Socket        |
-| CSS / MUI      | Sequelize (if SQL) | UUID for document IDs |
+| CSS / MUI      |
 
 ---
 
@@ -30,4 +30,4 @@ A collaborative rich text editor inspired by Google Docs, built with **React** a
 
 ```bash
 git clone we will put google clone here
-cd google-docs-clone
+cd Google_Doc to run the ui
