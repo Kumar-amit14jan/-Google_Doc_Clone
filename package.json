@@ -4,8 +4,15 @@
   "description": "A collaborative rich text editor inspired by Google Docs, built with **React** and **Node.js**. This app allows users to create, edit, and auto-save documents with a simple, intuitive interface.",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start":"nodemon app.js"
   },
   "author": "Amit Kumar",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "nodemon": "^3.1.9",
+    "socket.io": "^4.8.1"
+  }
 }
