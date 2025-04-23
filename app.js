@@ -1,14 +1,22 @@
 const express = require('express');
 const app = express();
-const port = 9000;
+const port = process.env.PORT || 9000;
 const http = require('http');
 const cors = require('cors');
+const connection = require('./database/db');
+const documentData = require('./controller/documentController');
+connection()
+  .then(() => {
+    console.log('DB init complete');
+  })
+  .catch((err) => {
+    console.error('Failed to init DB:', err);
+  });
 app.use(cors({
     origin: "*"
-}))
-// const Server = require('socket.io');
+}));
+
 const sockerio = require('socket.io');
-const req = require('express/lib/request');
 
 const server = http.createServer(app)
 const io = sockerio(server, {
@@ -20,11 +28,11 @@ const io = sockerio(server, {
 });
 io.on('connection', (socket) => {
     console.log("socket connected successfully", socket.id);
-    socket.on('get-document', (documentId) => {
-        const data = "";
+    socket.on('get-document', async (documentId) => {
+        const document = await documentData.getDocument(documentId)
         socket.join(documentId);
         socket.documentId = documentId; 
-        socket.emit('load-document' , data);
+        socket.emit('load-document' , document.data);
     })
 
     socket.on('send-changes', (delta) => {
@@ -33,10 +41,12 @@ io.on('connection', (socket) => {
         console.log(delta , documentId);
         socket.broadcast.to(documentId).emit('receive-changes', delta);
     })
+
+    socket.on('save-document' , async( data)=>{
+        await documentData.updateDocument(socket.documentId , data)
+    })
 })
-app.get('/', (req, res) => {
-    res.send("helo")
-})
+
 server.listen(port, () => {
     console.log("server is running at :", port);
 })

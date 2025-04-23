@@ -103,6 +103,12 @@ export function Editor() {
         })
         socket.emit('get-document', id)
     }, [quill, socket, id]);
+    useEffect(() => {
+        if (!quill || !socket) return;
+        setInterval(() => {
+            socket.emit('save-document', quill.getContents())
+        }, 2000)
+    }, [quill, socket])
     const handleGenerate = () => {
         if (quill && selection) {
             quill.deleteText(selection.index, selection.length);
