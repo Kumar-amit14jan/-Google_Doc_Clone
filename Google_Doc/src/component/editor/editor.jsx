@@ -63,7 +63,7 @@ export function Editor() {
     }, []);
     // to establish connection in ui side
     useEffect(() => {
-        const socket = io('https://cuddly-waddle-4w4v75xgg7x2j564-9000.app.github.dev/', { transports: ['websocket'] });
+        const socket = io('https://google-doc-clone-backend-vnnz.onrender.com', { transports: ['websocket'] });
         setSocket(socket)
         return () => {
             socket.disconnect()
