@@ -1,7 +1,7 @@
 import Box from '@mui/material/Box';
 import Quill from 'quill';
 import 'quill/dist/quill.snow.css';
-import { useEffect, useState } from 'react';
+import { useEffect, useState , usere} from 'react';
 import "./editor.css";
 import { io } from "socket.io-client";
 import { useParams } from 'react-router-dom';
@@ -48,12 +48,14 @@ export function Editor() {
             quillServer.setText('Loading a document!')
             setQuill(quillServer);
             quillServer.on('selection-change', (range) => {
+                const activeElement = document.activeElement;
+                const isInCustomInput = activeElement.closest('.custom-ai-input');
                 if (range && range.length > 0) {
                     const bounds = quillServer.getBounds(range.index, range.length);
                     setPosition({ top: bounds.top, left: bounds.left });
                     setSelection(range);
                     setShowInput(true);
-                } else {
+                } else if (!isInCustomInput) {
                     setShowInput(false);
                 }
             });
@@ -61,7 +63,7 @@ export function Editor() {
     }, []);
     // to establish connection in ui side
     useEffect(() => {
-        const socket = io('https://google-doc-clone-backend-ok4v.onrender.com/', { transports: ['websocket'] });
+        const socket = io('https://cuddly-waddle-4w4v75xgg7x2j564-9000.app.github.dev/', { transports: ['websocket'] });
         setSocket(socket)
         return () => {
             socket.disconnect()
@@ -109,11 +111,24 @@ export function Editor() {
             socket.emit('save-document', quill.getContents())
         }, 2000)
     }, [quill, socket])
-    const handleGenerate = () => {
+    const handleGenerate = async () => {
         if (quill && selection) {
-            quill.deleteText(selection.index, selection.length);
-            quill.insertText(selection.index, '✨ AI-generated content ✨');
             setShowInput(false);
+            const selectedText = quill.getText(selection.index, selection.length);
+            const prompt = `${inputValue} the following text:\n\n"${selectedText}"`;
+            try {
+                const res = await fetch('/api/v1/enhanceText', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt })
+                });
+                const data =  await res.json();
+                quill.deleteText(selection.index, selection.length);
+                quill.insertText(selection.index, data.enhanced);
+                setInputValue('')
+            } catch (error) {
+                console.error("error in enhanceing the text", error)
+            }
         }
     };
 
@@ -124,6 +139,7 @@ export function Editor() {
             <Box className="container" id="container" />
             {showInput && (
                 <Box
+                    className="custom-ai-input"
                     style={{
                         position: 'absolute',
                         top: position.top + 30,
@@ -133,6 +149,7 @@ export function Editor() {
                         padding: '8px',
                         borderRadius: '4px',
                         zIndex: 10,
+                        cursor: 'move',
                     }}
                 >
                     <input

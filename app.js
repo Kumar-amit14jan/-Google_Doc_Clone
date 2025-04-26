@@ -5,16 +5,22 @@ const http = require('http');
 const cors = require('cors');
 const connection = require('./database/db');
 const documentData = require('./controller/documentController');
+const routes = require('./apiRoutes/index');
+app.use(express.json());
 connection()
-  .then(() => {
-    console.log('DB init complete');
-  })
-  .catch((err) => {
-    console.error('Failed to init DB:', err);
-  });
+    .then(() => {
+        console.log('DB init complete');
+    })
+    .catch((err) => {
+        console.error('Failed to init DB:', err);
+    });
 app.use(cors({
-    origin: "*"
+    origin: '*',
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+
 
 const sockerio = require('socket.io');
 
@@ -22,28 +28,29 @@ const server = http.createServer(app)
 const io = sockerio(server, {
     cors: {
         origin: "*",
-        methods: ["GET", "POST"],
-        credentials: true
+        methods: ["GET", "POST", 'OPTIONS'],
+
     }
 });
+app.use('/v1', routes);
 io.on('connection', (socket) => {
     console.log("socket connected successfully", socket.id);
     socket.on('get-document', async (documentId) => {
         const document = await documentData.getDocument(documentId)
         socket.join(documentId);
-        socket.documentId = documentId; 
-        socket.emit('load-document' , document.data);
+        socket.documentId = documentId;
+        socket.emit('load-document', document.data);
     })
 
     socket.on('send-changes', (delta) => {
-        const documentId = socket.documentId; 
-        if(!documentId)return;
-        console.log(delta , documentId);
+        const documentId = socket.documentId;
+        if (!documentId) return;
+        console.log(delta, documentId);
         socket.broadcast.to(documentId).emit('receive-changes', delta);
     })
 
-    socket.on('save-document' , async( data)=>{
-        await documentData.updateDocument(socket.documentId , data)
+    socket.on('save-document', async (data) => {
+        await documentData.updateDocument(socket.documentId, data)
     })
 })
 
